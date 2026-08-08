@@ -2,10 +2,16 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { envs } from './config';
+import { Transport } from '@nestjs/microservices';
 
 async function bootstrap() {
 	const logger = new Logger('Main');
-	const app = await NestFactory.create(AppModule);
+	const app = await NestFactory.createMicroservice(AppModule, {
+		transport: Transport.TCP,
+		options: {
+			port: envs.port
+		}
+	});
 
 	app.useGlobalPipes(
 		new ValidationPipe({
@@ -14,7 +20,7 @@ async function bootstrap() {
 		})
 	);
 
-	await app.listen(envs.port);
-	logger.log(`Application is running on: ${await app.getUrl()}`);
+	await app.listen();
+	logger.log(`Products Microservice is listening on port ${envs.port}`);
 }
 bootstrap();
